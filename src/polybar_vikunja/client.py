@@ -125,7 +125,6 @@ def first_run():
         username=config['username'],
         password=config['password']
     )
-    client = PolybarVikunjaClient()
 
     try:
         client.login()
