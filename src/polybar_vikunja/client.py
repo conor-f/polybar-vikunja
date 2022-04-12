@@ -4,7 +4,7 @@ import os
 import requests
 
 from .config_helper import PolybarVikunjaConfig
-# from .popups import ConfigPopup
+from .popups import ConfigPopup
 
 
 class PolybarVikunjaClient():
@@ -58,6 +58,7 @@ class PolybarVikunjaClient():
             )
 
             self.jwt = response.json()["token"]
+            self.config.set("jwt", self.jwt)
 
     def list_todo_lists(self):
         '''
@@ -171,6 +172,7 @@ def main():
     group.add_argument("--init", action="store_true")
     group.add_argument("--list-todo-lists", action="store_true")
     group.add_argument("--get-todo-count", action="store_true")
+    group.add_argument("--config-popup", action="store_true")
 
     args = parser.parse_args()
 
@@ -183,6 +185,10 @@ def main():
         print(vikunja_client.list_todo_lists())
     elif args.get_todo_count:
         print(vikunja_client.get_todo_count())
+    elif args.config_popup:
+        ConfigPopup(
+            lists=vikunja_client.list_todo_lists()
+        )
 
 if __name__ == '__main__':
     main()
