@@ -4,63 +4,57 @@ from tkinter import *
 
 class ConfigPopup():
 
-    def __init__(self):
-        self.root = Tk(className="Vikunjabar")
+    def __init__(self, lists=None):
+        self.root = Tk(className="polybar-vikunja")
         self.root.attributes('-type', 'dialog')
         self.config = PolybarVikunjaConfig()
 
         self.position_window()
 
-        self.should_put_to_monthly_playlist = BooleanVar(
+
+        lists = [
+            {
+                "title": e["title"],
+                "id": e["id"]
+            } for e in lists
+        ]
+
+        listbox = Listbox(
             self.root,
-            self.config.get('should_put_to_monthly_playlist', True)
-        )
-        self.should_heart_on_lastfm = BooleanVar(
-            self.root,
-            self.config.get('should_heart_on_lastfm', True)
-        )
-        self.currently_playing_trunclen = IntVar(
-            self.root,
-            self.config.get('currently_playing_trunclen', 45)
+            selectmode='SINGLE',
         )
 
-        Label(self.root, text="Put to monthly playlist?").grid(row=0, column=0)
-        Checkbutton(
-            self.root,
-            variable=self.should_put_to_monthly_playlist,
-            command=self.handle_should_put_to_monthly_playlist_change
-        ).grid(row=0, column=1)
+        selected_index = None
+        for i in range(len(lists)):
+            e = lists[i]
+            listbox.insert(e["id"], e["title"])
 
-        Label(self.root, text="Heart on last.fm?").grid(row=1, column=0)
-        Checkbutton(
-            self.root,
-            variable=self.should_heart_on_lastfm,
-            command=self.handle_should_heart_on_lastfm
-        ).grid(row=1, column=1)
+            if str(e["id"]) == self.config.get("default_list", None):
+                selected_index = i
 
-        Label(self.root, text="Currently playing max length: ").grid(
-            row=2,
-            column=0
-        )
-        trunclen_entry_box = Entry(
-            self.root,
-            textvariable=self.currently_playing_trunclen,
-            width=3
-        )
-        trunclen_entry_box.grid(
-            row=2, column=1
-        )
-        trunclen_entry_box.bind(
-            "<Return>",
-            lambda event: self.handle_set_currently_playing_trunclen()
-        )
+        listbox.selection_set(selected_index)
+        listbox.see(selected_index)
+
+        scrollbar = Scrollbar(self.root)
+        listbox.config(yscrollcommand=scrollbar.set)
+        scrollbar.config(command=listbox.yview)
+
+        def handle_list_select(event):
+            selected_index = listbox.curselection()[0]
+            self.config.set(
+                "default_list",
+                str(lists[selected_index]["id"])
+            )
+
+        listbox.bind("<<ListboxSelect>>", handle_list_select)
+        listbox.grid(row=0, column=0)
 
         self.attach_close_window_handler()
         self.root.mainloop()
 
     def position_window(self):
         width = 250
-        height = 150
+        height = 250
 
         x = self.root.winfo_pointerx()
         y = self.root.winfo_pointery()
@@ -76,21 +70,3 @@ class ConfigPopup():
         def close_window(event=None):
             self.root.destroy()
         self.root.bind("<FocusOut>", close_window)
-
-    def handle_should_put_to_monthly_playlist_change(self):
-        self.config.set(
-            'should_put_to_monthly_playlist',
-            self.should_put_to_monthly_playlist.get()
-        )
-
-    def handle_should_heart_on_lastfm(self):
-        self.config.set(
-            'should_heart_on_lastfm',
-            self.should_heart_on_lastfm.get()
-        )
-
-    def handle_set_currently_playing_trunclen(self):
-        self.config.set(
-            'currently_playing_trunclen',
-            int(self.currently_playing_trunclen.get())
-        )
