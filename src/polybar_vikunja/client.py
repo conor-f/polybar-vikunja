@@ -4,7 +4,7 @@ import os
 import requests
 
 from .config_helper import PolybarVikunjaConfig
-from .popups import ConfigPopup
+from .popups import ConfigPopup, RemainingTodosPopup
 
 
 class PolybarVikunjaClient():
@@ -101,6 +101,18 @@ class PolybarVikunjaClient():
     def get_todo_count(self):
         return len(self.get_remaining_todos())
 
+    def mark_todo_complete_status(self, todo_id, is_complete):
+        requests.post(
+            self.base_url + f"/api/v1/tasks/{todo_id}",
+            headers={
+                "Authorization": f"Bearer {self.jwt}"
+            },
+            json={
+                "done": True,
+            }
+        )
+
+
 def first_run():
     '''
     Runs the first time polybar-vikunja is initialized. Gives a basic
@@ -172,7 +184,9 @@ def main():
     group.add_argument("--init", action="store_true")
     group.add_argument("--list-todo-lists", action="store_true")
     group.add_argument("--get-todo-count", action="store_true")
+    group.add_argument("--list-todos", action="store_true")
     group.add_argument("--config-popup", action="store_true")
+    group.add_argument("--show-todos-popup", action="store_true")
 
     args = parser.parse_args()
 
@@ -185,10 +199,14 @@ def main():
         print(vikunja_client.list_todo_lists())
     elif args.get_todo_count:
         print(vikunja_client.get_todo_count())
+    elif args.list_todos:
+        print(vikunja_client.get_remaining_todos())
     elif args.config_popup:
         ConfigPopup(
             lists=vikunja_client.list_todo_lists()
         )
+    elif args.show_todos_popup:
+        RemainingTodosPopup(vikunja_client)
 
 if __name__ == '__main__':
     main()
