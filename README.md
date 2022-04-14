@@ -5,9 +5,13 @@ displays how many incomplete todos you have in a list, and allows you to mark
 them as complete/incomplete easily. You can specify an individual list to show
 using a basic right-click popup menu.
 
-### Images
+
+![Screenshot from 2022-04-14 15-57-42](https://user-images.githubusercontent.com/2671067/163417918-ab2c7315-1026-47f4-875c-7bbdc812c8c8.png)
+![Screenshot from 2022-04-14 15-58-08](https://user-images.githubusercontent.com/2671067/163417934-8ecbe24f-cd43-4d9b-be74-f0267d0d3268.png)
+![Screenshot from 2022-04-14 15-59-36](https://user-images.githubusercontent.com/2671067/163417946-fd2497e8-3e38-4bcc-886e-26ad035c5c80.png)
 
 ## Usage:
+
   After installing and configuring `spotibar` to run on your Polybar as
 described below, you should see the number of remaining todos you have. If you
 right-click on this, you will be able to set which list `polybar-vikunja` is
