@@ -70,3 +70,74 @@ class ConfigPopup():
         def close_window(event=None):
             self.root.destroy()
         self.root.bind("<FocusOut>", close_window)
+
+class RemainingTodosPopup():
+
+    def __init__(self, vikunja_client):
+        self.root = Tk(className="polybar-vikunja")
+        self.root.attributes('-type', 'dialog')
+        self.config = PolybarVikunjaConfig()
+        self.vikunja_client = vikunja_client
+
+        self.position_window()
+
+        self.remaining_todos = [
+            {
+                "title": e["title"],
+                "id": e["id"]
+            } for e in vikunja_client.get_remaining_todos()
+        ]
+
+        self.is_checked = {
+            todo["id"]: BooleanVar()
+            for todo in self.remaining_todos
+        }
+
+        for i in range(len(self.remaining_todos)):
+            row = Frame(self.root)
+            row.pack(
+                fill=BOTH,
+                expand=True
+            )
+
+            Checkbutton(
+                row,
+                variable=self.is_checked[self.remaining_todos[i]["id"]],
+                command=lambda todo_id=self.remaining_todos[i]["id"]: self.handle_checkbox_click(todo_id)
+            ).pack(
+                side=LEFT
+            )
+            Label(
+                row,
+                text=self.remaining_todos[i]["title"]
+            ).pack(
+                side=LEFT,
+            )
+
+        self.attach_close_window_handler()
+        self.root.mainloop()
+
+    def handle_checkbox_click(self, todo_id):
+        self.vikunja_client.mark_todo_complete_status(
+            todo_id,
+            self.is_checked[todo_id].get()
+        )
+
+    def position_window(self):
+        width = 350
+        height = 300
+
+        x = self.root.winfo_pointerx()
+        y = self.root.winfo_pointery()
+        abs_coord_x = self.root.winfo_pointerx() - self.root.winfo_vrootx()
+        abs_coord_y = self.root.winfo_pointery() - self.root.winfo_vrooty()
+
+        abs_coord_x -= int(width / 2)
+        abs_coord_y -= int(height) - int(height / 10)
+
+        self.root.geometry(f"{width}x{height}+{abs_coord_x}+{abs_coord_y}")
+
+    def attach_close_window_handler(self):
+        def close_window(event=None):
+            self.root.destroy()
+        self.root.bind("<FocusOut>", close_window)
