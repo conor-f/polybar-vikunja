@@ -38,13 +38,13 @@ class PolybarVikunjaClient():
 
         self.login()
 
-    def login(self):
+    def login(self, refresh_token=False):
         '''
         Logs in to the Vikunja instance using your config.
         '''
         self.jwt = self.config.get('jwt', None)
 
-        if not self.jwt:
+        if not self.jwt or refresh_token:
             login_url = self.base_url + '/api/v1/login'
             response = requests.post(
                 login_url,
@@ -71,7 +71,12 @@ class PolybarVikunjaClient():
             }
         )
 
-        return response.json()
+        response = response.json()
+        if "message" in response and response["message"] == "invalid or expired jwt":
+            self.login(refresh_token=True)
+            return self.list_todo_lists()
+        else:
+            return response
 
     def list_list_contents(self):
         response = requests.get(
@@ -81,7 +86,12 @@ class PolybarVikunjaClient():
             }
         )
 
-        return response.json()
+        response = response.json()
+        if "message" in response and response["message"] == "invalid or expired jwt":
+            self.login(refresh_token=True)
+            return self.list_list_contents()
+        else:
+            return response
 
     def get_remaining_todos(self):
         response = requests.get(
@@ -96,13 +106,19 @@ class PolybarVikunjaClient():
             }
         )
 
-        return response.json()
+        response = response.json()
+        if "message" in response and response["message"] == "invalid or expired jwt":
+            self.login(refresh_token=True)
+            return self.get_remaining_todos()
+        else:
+            return response
+
 
     def get_todo_count(self):
         return len(self.get_remaining_todos())
 
     def mark_todo_complete_status(self, todo_id, is_complete):
-        requests.post(
+        response = requests.post(
             self.base_url + f"/api/v1/tasks/{todo_id}",
             headers={
                 "Authorization": f"Bearer {self.jwt}"
@@ -111,6 +127,13 @@ class PolybarVikunjaClient():
                 "done": True,
             }
         )
+
+        response = response.json()
+        if "message" in response and response["message"] == "invalid or expired jwt":
+            self.login(refresh_token=True)
+            return self.mark_todo_complete_status(todo_id, is_complete)
+        else:
+            return response
 
 
 def first_run():
