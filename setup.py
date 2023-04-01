@@ -10,7 +10,7 @@ INSTALL_REQUIRES = [
 setup(
     name='polybar-vikunja',
     description='Vikunja plugin for Polybar',
-    version='0.1.2',
+    version='0.2.0',
     url='https://github.com/conor-f/polybar-vikunja',
     python_requires='>=3.6',
     packages=find_packages('src'),

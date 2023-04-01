@@ -65,7 +65,7 @@ class PolybarVikunjaClient():
         Returns a dict of list names to IDs.
         '''
         response = requests.get(
-            self.base_url + "/api/v1/lists",
+            self.base_url + "/api/v1/projects",
             headers={
                 "Authorization": f"Bearer {self.jwt}"
             }
@@ -80,7 +80,7 @@ class PolybarVikunjaClient():
 
     def list_list_contents(self):
         response = requests.get(
-            self.base_url + f"/api/v1/lists/{self.default_list}/tasks",
+            self.base_url + f"/api/v1/projects/{self.default_list}/tasks",
             headers={
                 "Authorization": f"Bearer {self.jwt}"
             }
@@ -95,7 +95,7 @@ class PolybarVikunjaClient():
 
     def get_remaining_todos(self):
         response = requests.get(
-            self.base_url + f"/api/v1/lists/{self.default_list}/tasks",
+            self.base_url + f"/api/v1/projects/{self.default_list}/tasks",
             headers={
                 "Authorization": f"Bearer {self.jwt}"
             },
